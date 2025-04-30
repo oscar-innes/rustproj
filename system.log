@@ -1,0 +1,239 @@
+2024-11-25 16:32:38,290 [INFO] ccse.views: Account johnjones created.
+2024-11-25 17:18:14,786 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:21:32,287 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:22:18,195 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:28:29,249 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:38:32,639 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:40:37,419 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:43:08,387 [INFO] ccse.views: johnjones logged in and accessed admin panel.
+2024-11-25 17:43:37,424 [INFO] ccse.views: johnjones's password has been updated to a new value.
+2024-12-02 13:45:48,909 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-02 14:17:12,670 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-02 15:06:57,863 [INFO] ccse.views: TheBigBoss has logged out of the site.
+2024-12-02 15:10:17,072 [INFO] ccse.views: guru successfully logged in
+2024-12-02 20:22:13,173 [INFO] ccse.views: guru successfully logged in
+2024-12-04 16:59:39,590 [INFO] ccse.views: guru successfully logged in
+2024-12-09 14:35:18,546 [INFO] ccse.views: TheBigBoss has logged out of the site.
+2024-12-09 14:35:29,824 [INFO] ccse.views: guru successfully logged in
+2024-12-09 15:56:35,839 [INFO] ccse.views: guru successfully logged in
+2024-12-09 15:56:59,597 [INFO] ccse.views: guru has logged out of the site.
+2024-12-09 15:57:10,734 [INFO] ccse.views: guru successfully logged in
+2024-12-09 16:49:22,066 [INFO] ccse.views: guru successfully logged in
+2024-12-09 18:28:39,765 [INFO] ccse.views: guru successfully logged in
+2024-12-09 18:35:54,688 [INFO] ccse.views: guru successfully logged in
+2024-12-09 18:38:17,571 [INFO] ccse.views: guru successfully logged in
+2024-12-09 18:44:02,459 [INFO] ccse.views: guru successfully logged in
+2024-12-09 18:44:45,490 [INFO] ccse.views: guru successfully logged in
+2024-12-10 13:02:13,071 [INFO] ccse.views: guru successfully logged in
+2024-12-10 13:10:58,112 [INFO] ccse.views: guru successfully logged in
+2024-12-10 13:13:28,910 [INFO] ccse.views: guru successfully logged in
+2024-12-10 13:21:33,047 [INFO] ccse.views: guru successfully logged in
+2024-12-10 13:52:29,371 [INFO] ccse.views: guru successfully logged in
+2024-12-10 16:16:53,567 [INFO] ccse.views: guru successfully logged in
+2024-12-10 16:18:23,273 [INFO] ccse.views: guru successfully logged in
+2024-12-10 16:19:04,417 [INFO] ccse.views: guru successfully logged in
+2024-12-10 16:51:03,366 [INFO] ccse.views: guru successfully logged in
+2024-12-10 17:47:47,417 [INFO] ccse.views: guru has logged out of the site.
+2024-12-10 19:39:20,737 [INFO] ccse.views: guru successfully logged in
+2024-12-10 20:12:15,283 [INFO] ccse.views: guru successfully logged in
+2024-12-10 20:24:16,265 [INFO] ccse.views: guru has logged out of the site.
+2024-12-10 20:27:29,252 [INFO] ccse.views: TheBigBoss has logged out of the site.
+2024-12-11 10:03:05,562 [INFO] ccse.views: guru successfully logged in
+2024-12-11 10:03:27,485 [INFO] ccse.views: guru successfully logged in
+2024-12-11 10:03:55,032 [INFO] ccse.views: guru successfully logged in
+2024-12-11 10:05:43,610 [INFO] ccse.views: guru successfully logged in
+2024-12-11 10:46:28,295 [INFO] ccse.views: Account gobba created.
+2024-12-11 20:33:26,522 [INFO] ccse.views: guru successfully logged in
+2024-12-11 20:52:06,351 [INFO] ccse.views: guru successfully logged in
+2024-12-12 08:05:17,214 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-12 08:06:22,620 [INFO] ccse.views: TheBigBoss has logged out of the site.
+2024-12-12 08:17:18,951 [CRITICAL] ccse.views: Attempted access admin page and was forbidden.
+2024-12-12 08:27:07,354 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-12 08:34:48,672 [INFO] ccse.views: TheBigBoss has logged out of the site.
+2024-12-12 08:35:38,302 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-12 11:02:00,451 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:07:13,891 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:12:23,383 [INFO] ccse.views: guru has logged out of the site.
+2024-12-12 11:12:35,076 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:15:12,755 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:15:57,783 [INFO] ccse.views: Payment from guru approved for  Product: Toy x 1 .
+2024-12-12 11:16:42,355 [INFO] ccse.views: Payment from guru approved for .
+2024-12-12 11:28:05,124 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:38:35,823 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:56:37,252 [INFO] ccse.views: guru successfully logged in
+2024-12-12 11:57:47,987 [INFO] ccse.views: guru successfully logged in
+2024-12-12 12:08:00,462 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:08:30,461 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:10:27,646 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:10:28,236 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:13:35,330 [INFO] ccse.views: guru has logged out of the site.
+2024-12-12 12:13:45,009 [INFO] ccse.views: guru successfully logged in
+2024-12-12 12:13:52,655 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:15:26,659 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:18:23,705 [INFO] ccse.views: Order from guru cancelled for  Product: Toy x 1 .
+2024-12-12 12:19:08,172 [INFO] ccse.views: Payment from guru approved for  Product: Toy x 1 .
+2024-12-12 12:49:46,608 [INFO] ccse.views: guru successfully logged in
+2024-12-12 12:54:57,503 [INFO] ccse.views: Payment from guru approved for  Product: Toy x 1 .
+2024-12-12 13:21:50,258 [INFO] ccse.views: guru successfully logged in
+2024-12-12 13:27:34,020 [INFO] ccse.views: guru successfully logged in
+2024-12-12 13:28:40,635 [INFO] ccse.views: guru successfully logged in
+2024-12-12 13:30:16,571 [INFO] ccse.views: guru successfully logged in
+2024-12-12 18:04:59,511 [INFO] ccse.views: guru successfully logged in
+2024-12-12 18:05:52,363 [INFO] ccse.views: guru successfully logged in
+2024-12-12 18:06:50,571 [INFO] ccse.views: guru successfully logged in
+2024-12-12 18:14:10,101 [INFO] ccse.views: Order from guru cancelled for None.
+2024-12-12 18:47:06,643 [INFO] ccse.views: guru successfully logged in
+2024-12-12 19:19:31,140 [CRITICAL] ccse.views: Attempted access admin page and was forbidden.
+2024-12-12 19:19:42,115 [INFO] ccse.views: guru successfully logged in
+2024-12-12 19:29:21,966 [INFO] ccse.views: guru successfully logged in
+2024-12-12 19:30:10,596 [INFO] ccse.views: Payment from guru approved for  Product: Toy x 1 .
+2024-12-12 19:38:00,430 [INFO] ccse.views: Order for guru updated to Dispatched to courier.
+2024-12-13 11:40:24,817 [INFO] ccse.views: guru successfully logged in
+2024-12-14 10:56:16,536 [INFO] ccse.views: guru successfully logged in
+2024-12-14 10:56:45,033 [INFO] ccse.views: New product BigHammer added to avaliable products.
+2024-12-14 10:58:07,727 [INFO] ccse.views: Product BigHammer deleted.
+2024-12-14 10:58:43,467 [INFO] ccse.views: New product BigHammer added to avaliable products.
+2024-12-14 11:01:27,086 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-14 11:01:38,107 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-14 11:01:52,138 [INFO] ccse.views: guru has logged out of the site.
+2024-12-14 11:01:59,986 [INFO] ccse.views: guru successfully logged in
+2024-12-14 11:02:04,891 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-14 11:03:05,324 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-14 11:04:07,193 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-14 11:10:34,513 [INFO] ccse.views: Product BigHammer deleted.
+2024-12-14 11:11:34,712 [INFO] ccse.views: New product BigHammer added to avaliable products.
+2024-12-14 11:13:57,537 [INFO] ccse.views: Product BigHammer deleted.
+2024-12-14 11:14:03,413 [INFO] ccse.views: New product BigHammer added to avaliable products.
+2024-12-16 08:53:39,968 [INFO] ccse.views: guru successfully logged in
+2024-12-16 09:25:38,300 [INFO] ccse.views: guru successfully logged in
+2024-12-16 09:26:10,648 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 09:27:33,779 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 09:36:23,766 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 09:39:05,121 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 09:46:26,552 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 09:47:11,732 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 09:57:52,106 [INFO] ccse.views: guru successfully logged in
+2024-12-16 10:17:39,353 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:18:33,272 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:19:20,817 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:20:06,596 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:22:56,098 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:24:19,247 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:25:43,684 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:26:32,042 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:28:40,385 [INFO] ccse.views: guru successfully logged in
+2024-12-16 10:29:06,894 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:45:13,611 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:47:49,090 [INFO] ccse.views: guru has logged out of the site.
+2024-12-16 10:47:57,470 [INFO] ccse.views: guru successfully logged in
+2024-12-16 10:48:26,145 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:49:09,336 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:51:35,955 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:54:28,808 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 10:58:12,293 [INFO] ccse.views: Payment from guru approved for  Product: BigHammer x 1 .
+2024-12-16 11:10:48,309 [INFO] ccse.views: guru successfully logged in
+2024-12-16 11:11:16,613 [ERROR] ccse.views: Payment from guru failed for  Product: BigHammer x 1 .
+2024-12-16 11:11:56,868 [INFO] ccse.views: Payment from guru approved for  Product: BigHammer x 1 .
+2024-12-18 11:04:09,351 [INFO] ccse.views: guru successfully logged in
+2024-12-18 11:04:42,602 [INFO] ccse.views: guru has logged out of the site.
+2024-12-20 08:59:46,949 [INFO] ccse.views: guru successfully logged in
+2024-12-20 09:46:31,133 [INFO] ccse.views: guru successfully logged in
+2024-12-20 14:01:35,875 [INFO] ccse.views: guru successfully logged in
+2024-12-20 14:15:34,932 [INFO] ccse.views: guru has logged out of the site.
+2024-12-20 14:32:07,572 [INFO] ccse.views: guru successfully logged in
+2024-12-20 14:32:29,845 [INFO] ccse.views: Product BigHammer deleted.
+2024-12-20 17:32:39,094 [INFO] ccse.views: guru successfully logged in
+2024-12-20 17:40:24,712 [INFO] ccse.views: New product Hotel Doorlocker added to avaliable products.
+2024-12-22 09:04:43,231 [INFO] ccse.views: guru successfully logged in
+2024-12-22 09:12:18,190 [INFO] ccse.views: guru has logged out of the site.
+2024-12-22 09:12:28,614 [INFO] ccse.views: guru successfully logged in
+2024-12-22 09:24:21,759 [INFO] ccse.views: guru has logged out of the site.
+2024-12-22 09:24:29,599 [INFO] ccse.views: guru successfully logged in
+2024-12-22 09:36:01,612 [INFO] ccse.views: guru has logged out of the site.
+2024-12-22 09:36:57,616 [INFO] ccse.views: guru successfully logged in
+2024-12-22 09:37:00,209 [INFO] ccse.views: guru has logged out of the site.
+2024-12-22 09:42:04,470 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-22 09:44:04,881 [INFO] ccse.views: TheBigBoss has logged out of the site.
+2024-12-22 09:45:41,079 [INFO] ccse.views: Account SuperCoolShopper created.
+2024-12-22 09:46:20,654 [INFO] ccse.views: SuperCoolShopper logged in.
+2024-12-22 09:46:34,335 [INFO] ccse.views: SuperCoolShopper has logged out of the site.
+2024-12-22 09:59:12,890 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:00:36,847 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:02:42,006 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:03:25,190 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:04:29,354 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:06:16,922 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:08:05,234 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:08:59,814 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:09:37,827 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:10:52,012 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:12:57,307 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:13:46,589 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:14:40,353 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:15:21,489 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:16:12,238 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:17:39,216 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:25:51,420 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:28:12,441 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:31:20,931 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:34:10,446 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:34:35,874 [ERROR] ccse.views: Failed password change for SuperCoolShopper.
+2024-12-22 10:36:02,779 [INFO] ccse.views: SuperCoolShopper has logged out of the site.
+2024-12-22 10:38:32,709 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 10:40:18,527 [INFO] ccse.views: SuperCoolShopper has logged out of the site.
+2024-12-22 11:08:30,704 [INFO] ccse.views: guru successfully logged in
+2024-12-22 11:22:53,390 [INFO] ccse.views: guru has logged out of the site.
+2024-12-22 11:25:14,843 [INFO] ccse.views: Account test created.
+2024-12-22 12:37:06,022 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 12:38:53,061 [ERROR] ccse.views: Failed password change for SuperCoolShopper.
+2024-12-22 12:40:05,278 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 12:40:53,270 [ERROR] ccse.views: Failed password change for SuperCoolShopper.
+2024-12-22 12:46:32,010 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 12:50:19,294 [INFO] ccse.views: SuperCoolShopper has logged out of the site.
+2024-12-22 12:50:26,221 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 12:50:36,636 [INFO] ccse.views: SuperCoolShopper logged in and accessed admin panel.
+2024-12-22 12:51:25,914 [ERROR] ccse.views: Failed password change for SuperCoolShopper.
+2024-12-22 12:52:12,042 [INFO] ccse.views: SuperCoolShopper's password has been updated to a new value.
+2024-12-22 12:52:48,549 [INFO] ccse.views: Account testing created.
+2024-12-22 12:55:13,318 [INFO] ccse.views: SuperCoolShopper has logged out of the site.
+2024-12-22 12:56:07,058 [INFO] ccse.views: Account tomtayle created.
+2024-12-22 13:01:22,219 [INFO] ccse.views: guru successfully logged in
+2024-12-22 13:03:14,668 [INFO] ccse.views: Account tomtayle created.
+2024-12-22 13:18:26,593 [INFO] ccse.views: Payment from guru approved for  Product: Hotel Doorlocker x 1 .
+2024-12-22 13:20:59,414 [INFO] ccse.views: Product Dfqff deleted.
+2024-12-22 13:23:39,760 [INFO] ccse.views: New product Sandwich added to avaliable products.
+2024-12-22 13:24:19,958 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:25:31,697 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:31:47,484 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:33:47,629 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:39:00,640 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:39:35,049 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:41:45,947 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:42:57,412 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:43:43,097 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:45:08,746 [INFO] ccse.views: Deletion attempted by guru but did not succeed.
+2024-12-22 13:46:48,241 [INFO] ccse.views: Deletion attempted by guru but did not succeed.
+2024-12-22 13:47:14,523 [INFO] ccse.views: Deletion attempted by guru but did not succeed.
+2024-12-22 13:48:23,141 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:48:46,850 [CRITICAL] ccse.views: Attempted access admin page and was forbidden.
+2024-12-22 13:48:48,073 [CRITICAL] ccse.views: Attempted access admin page and was forbidden.
+2024-12-22 13:48:48,572 [CRITICAL] ccse.views: Attempted access admin page and was forbidden.
+2024-12-22 13:49:00,798 [INFO] ccse.views: guru successfully logged in
+2024-12-22 13:49:05,312 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:51:52,539 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:52:23,900 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 13:56:02,493 [CRITICAL] ccse.views: User Attempted access admin page and was forbidden.
+2024-12-22 17:27:11,429 [INFO] ccse.views: guru successfully logged in
+2024-12-22 17:28:02,798 [CRITICAL] ccse.views: guru attempted to use moderator powers to make someone an admin. This is not allowed.
+2024-12-22 17:28:23,788 [CRITICAL] ccse.views: guru attempted to use moderator powers to make someone an admin. This is not allowed.
+2024-12-22 17:28:39,212 [INFO] ccse.views: Order for guru updated to Left the warehouse.
+2024-12-22 17:29:05,745 [INFO] ccse.views: Order for guru updated to Dispatched to courier.
+2024-12-22 17:32:16,015 [INFO] ccse.views: Product IPv4 camera has had its stock increased by 2.
+2024-12-22 18:57:10,344 [INFO] ccse.views: TheBigBoss logged in and accessed admin panel.
+2024-12-22 18:57:37,868 [CRITICAL] ccse.views: TheBigBoss has had his role changed to moderator
+2024-12-22 19:02:53,928 [INFO] ccse.views: User johnjones deleted.
+2024-12-22 19:46:26,883 [INFO] ccse.views: guru successfully logged in
+2024-12-30 09:35:15,211 [INFO] ccse.views: guru successfully logged in
+2024-12-30 16:41:13,971 [INFO] ccse.views: guru successfully logged in
+2025-01-15 16:26:44,611 [INFO] ccse.views: guru successfully logged in
+2025-01-27 13:59:39,992 [INFO] ccse.views: guru successfully logged in
