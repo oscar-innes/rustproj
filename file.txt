@@ -1,2 +1,0 @@
-2024-11-25 17:38:32,639 [INFO] ccse.views: johnjones logged in and accessed admin panel.
-check check

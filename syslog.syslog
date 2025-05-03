@@ -1,0 +1,2 @@
+Mar  4 16:01:23 myhost sshd[12345]: Accepted password for user from 192.168.1.100 port 54321 ssh2
+<34>Oct 11 22:14:15 mymachine su: 'su root' failed for lonvick on /dev/pts/8

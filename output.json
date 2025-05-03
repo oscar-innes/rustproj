@@ -1,0 +1,8 @@
+{"ip": "192.168.2.20", "timestamp": "28/Jul/2006:10:27:10 -0300", "url": "/cgi-bin/try/", "protocol": GET, "code": 200, "size": 3395, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:04 -0300", "url": "/", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:04 -0300", "url": "/login", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:07 -0300", "url": "/login", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:22 -0300", "url": "/login", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:33 -0300", "url": "/login", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:44 -0300", "url": "/login", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
+{"ip": "127.0.0.1", "timestamp": "28/Jul/2006:10:22:55 -0300", "url": "/login", "protocol": GET, "code": 401, "size": 2216, "referer": HTTP/1.0, "useragent": -}
