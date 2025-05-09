@@ -1,26 +1,25 @@
 use std::env;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, stdin, stdout, Write};
 use ipgeolocate::{Locator, Service};
 use regex::Regex;
 use std::path::Path;
-use chrono::{NaiveDateTime, DateTime, Utc, Duration, Timelike};
-use std::collections::{HashMap, VecDeque};
+use chrono::{DateTime, Utc, Duration, Timelike};
 use async_std::task;
 use tokio::runtime::Runtime;
 use lettre::{transport::smtp::authentication::Credentials, Message, SmtpTransport, Transport};
-use lettre::message::{Mailbox, MultiPart, SinglePart};
-use dotenv::dotenv;
-use std::io::Write;
-use evtx::EvtxParser;
+use dotenvy::dotenv;
+use evtx::EvtxParser; //only way to work with these logs
 use serde_json::Value;
+use log::{info, error};
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::fs::{OpenOptions};
 
-pub const email: &str = "";  //add the email you want to use to recieve the alerts.
-static system_logs: &[&str] = &[
+pub const EMAIL: &str = "innesoscar@gmail.com";  //add the email you want to use to recieve the alerts. PLEASE SET THIS OR THE PROGRAM WILL NOT WORK!
+static SYSTEM_LOGS: &[&str] = &[
 "test.evtx",
 "system.log",
 "apache.log",
-"test.evtx",
 "/var/log/syslog",      //alter these files depending on what your system uses and what files you drag into the projects folder.
 "/var/log/messages",    
 "/var/log/system.log", 
@@ -29,26 +28,6 @@ static system_logs: &[&str] = &[
 "C:\\Windows\\System32\\winevt\\Logs\\Application.evtx",
 ];
 
-// ADD PATTERNS TO ALL SECTIONS -- FRIDAY WORK
-// think of new features based on research.
-
-#[derive(Debug)]
-struct BasicLog {
-    time: String,
-    severity: String,
-    info: String,
-}
-
-struct FailedLogin {
-    timestamp: DateTime<Utc>
-}
-
-#[derive(Debug)]
-struct WinEvnt {
-    time: String,
-    severity: String,
-    info: String,
-}
 
 #[derive(Debug)]
 struct SysLog {
@@ -95,41 +74,86 @@ struct Auth {
 }
 
 fn main(){
-    let args: Vec<String> = env::args().collect();
-    match args[1].as_str() {
+    let mut hashioka = DefaultHasher::new();
+    dotenv().ok();
+    match env::var("RUSTALYZER_PASSWORD") {
+        Ok(password) => {
+            println!("Enter your orginisations password!");
+            let mut pass = String::new();
+            let _ = stdout().flush();
+            stdin().read_line(&mut pass).expect("Did not enter a correct string");
+            pass.hash(&mut hashioka);
+            let stored = hashioka.finish();  
+            while stored.to_string() != password {
+                println!("that was the wrong password");
+                println!("word {}, {}", pass, password);
+                stdin().read_line(&mut pass).expect("Did not enter a correct string");
+                pass.hash(&mut hashioka);
+                let stored = hashioka.finish(); 
+            }
+            println!("Logged in successfully! Scan is about to begin!")
+        },
+        Err(_) => {
+            println!("It appears you do not have a password set for your orginisation, Please enter one below!");
+            let mut pass = String::new();
+            let _ = stdout().flush();
+            stdin().read_line(&mut pass).expect("Did not enter a correct string");
+            pass.hash(&mut hashioka);
+            let stored = hashioka.finish();
+            let mut envy = OpenOptions::new()
+                .append(true)    
+                .open(".env")
+                .expect("Didn't find an env file to send data through.");
+            writeln!(envy);
+            writeln!(envy, "RUSTALYZER_PASSWORD={}", stored).expect("Env file failed");
+            println!("Orginisations password has been set, remeber that now...!");
+        },
+        //logic to create a new password!
+    }
+    let vec: Vec<String> = env::args().collect();
+    match vec[1].as_str() {
         "parse" => {
-            match args[2].as_str() {
+            match vec[2].as_str() {
                 "filelist" => {
                     println!("This may take a while!");
                     let _ = task::block_on(livefile());
                     async fn livefile() -> io::Result<()> {
-                        let privs = vec!["NT AUTHORITY\\SYSTEM",
+                        let privs = ["NT AUTHORITY\\SYSTEM",
                                     "Administrator",
                                     "admin",
                                     "DOMAIN\\Administrator",
                                     "SYSTEM",
                                     "root"];
                         println!("Analysing current system log files found.");
-                        'goob: for pathing in system_logs {
+                        let nginx = Regex::new(r#"^(\S+) \S+ \S+ \[([^\]]+)\] \"(\S+) (.*?) (\S+)\" (\d{3}) (\d+) \"([^\"]*)\" \"([^\"]*)\""#).unwrap();
+                        let apache = Regex::new(r#"^(\S+) (\S+) (\S+) \[([^\]]+)\] \"(\S+) (.*?) (\S+)\" (\d{3}) (\d+|-)$"#).unwrap();
+                        let sissy = Regex::new(r"^(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2}) (\S+) (\w+)(?:\[(\d+)\])?: (.+)$").unwrap();
+                        let v2 = Regex::new(r"^<(\d+)>(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+(\S+)\s+(\S+):\s(.+)$").unwrap();
+                        let authy = Regex::new(
+                            r"^(?P<timestamp>\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+(?P<host>\S+)\s+(?P<program>[\w\-/]+)(?:\[(?P<pid>\d+)\])?:\s+(?P<message>.+)$"
+                        ).unwrap();
+                        'goob: for pathing in SYSTEM_LOGS {
                             println!("{}", pathing);
                             let paf = pathing.to_string();
                             let syslog = match File::open(pathing) {
                                 Ok(file) => file,
                                 Err(err) => {
-                                    println!("{}", err);
+                                    error!("System file failed to open due to {}", err);
                                     continue 'goob;
                                 }
                             };
                             let read = BufReader::new(syslog);
                             let path = Path::new(&paf);
-                            match path.extension().and_then(|s| s.to_str()) {
+                            match path.extension().and_then(|p| p.to_str()) {
                                 Some("evtx") => {
+                                    
                                     let mut user_attempts: Vec<DateTime<Utc>> = Vec::new();
-                                    let mut parser = EvtxParser::from_path(&path).unwrap();
+                                    let mut parser = EvtxParser::from_path(path).unwrap(); // i know we werent met to do this but it was the only way
                                     for logy in parser.records_json() {
                                         let data = &logy.unwrap().data;
-                                        let result: Result<Value, _> = serde_json::from_str(data);
-                                        if let Ok(json) = result {
+                                        let outcome: Result<Value, _> = serde_json::from_str(data);
+                                        if let Ok(json) = outcome {
+                                            
                                             let event = json["Event"]["System"]["EventID"].as_i64().unwrap_or(0);
                                             let command = json["Event"]["EventData"]["Data"].as_array()
                                             .and_then(|items| items.iter().find(|r| r["#attributes"]["Name"] == "CommandLine"))
@@ -139,7 +163,6 @@ fn main(){
                                             .and_then(|items| items.iter().find(|r| r["#attributes"]["Name"] == "IpAddress"))
                                             .and_then(|add| add["#text"].as_str())
                                             .unwrap_or("N/A");
-                                            let time = json["Event"]["System"]["TimeCreated"]["#attributes"]["SystemTime"].as_str().unwrap_or("");
                                             let source = json["Event"]["System"]["Provider"]["#attributes"]["Name"].as_str().unwrap_or("");
                                             let pid = json["Event"]["System"]["Execution"]["#attributes"]["ProcessID"].as_u64().unwrap_or(0);
                                             let name = json["Event"]["EventData"]["Data"]["#attributes"].as_array()
@@ -151,31 +174,33 @@ fn main(){
                                             if event == 4688 && (command.to_lowercase().contains("powershell") || command.to_lowercase().contains("cmd.exe") || command.to_lowercase().contains(" -enc ")) {
                                                 let message = format!("Unusual command activity launched: {} at {}", &command, &time);
                                                 let _ = create_alert(&message);
-                                            } else if event == 1102 || event == 104{
-                                                let message = format!("Audit log modified/cleared on the system by an actor at {}", &time);
+                                            } else if event == 1102 || event == 104 {
+                                                let message = format!("Audit log modified/cleared on the system by an actor at {}", time);
                                                 let _ = create_alert(&message);
-                                            } else if event == 1149 || event == 104{
-                                                let message = format!("A unauthorised remote access session was created, check if this was allowed at {}", &time);
+                                            } else if event == 1149 {
+                                                let message = format!("A unauthorised remote access session was created, check if this was allowed at {}", time);
                                                 let _ = create_alert(&message);
                                             } else if event == 4697 || event == 7045 {
-                                                let message = format!("Unknown potentially malicious service installed or created on the machine at {}", &time);
+                                                let message = format!("Unknown potentially malicious service installed or created on the machine at {}", time);
                                                 let _ = create_alert(&message);
                                             } else if event == 4625 {
-                                                if let Ok(timestamp) = DateTime::parse_from_str(&time, "%Y-%m-%d %H:%M:%S") {
+                                                if let Ok(timestamp) = DateTime::parse_from_str(time, "%Y-%m-%d %H:%M:%S") {
                                                     let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    let _ = user_attempts.push(timestamp_utc);
+                                                    user_attempts.push(timestamp_utc);
+                                                } else {
+                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
                                                 }
                                             } else if event == 4672 || event == 4624 {
-                                                if sid == "S-1-5-18" || sid == "S-1-5-32-544" || privs.contains(name) {
-                                                    let message = format!("A potential priviledge escalation onto a adminstrative account has occured: {}", &log.time);
+                                                if sid == "S-1-5-18" || sid == "S-1-5-32-544" || privs.contains(&name) {
+                                                    let message = format!("A potential priviledge escalation onto a adminstrative account has occured: {}", &time);
                                                     let _ = create_alert(&message);
-                                                } else if !privs.contains(name) {
-                                                    let message = format!("A non root account was given special priviledges at this time: {}", &time.);
+                                                } else if !privs.contains(&name) {
+                                                    let message = format!("A non root account was given special priviledges at this time: {}", &time);
                                                     let _ = create_alert(&message);
                                                 }
                                             }
                                             let rt = Runtime::new().unwrap();
-                                            let (nation, country) = rt.block_on(async {;
+                                            let (nation, country) = rt.block_on(async {
                                                 locate(address.to_string()).await
                                             });
                                             if nation {
@@ -196,26 +221,17 @@ fn main(){
                                             }
                                         }
                                         user_attempts.clear();
-                                        continue 'goob;
                                     }
-
-                                    return Ok(())
+                                    continue 'goob;
                                 }
                                 Some("log") | Some("syslog") | Some("messages") | Some("txt")=> {
-                                    let nginx = Regex::new(r#"^(\S+) \S+ \S+ \[([^\]]+)\] \"(\S+) (.*?) (\S+)\" (\d{3}) (\d+) \"([^\"]*)\" \"([^\"]*)\""#).unwrap();
-                                    let apache = Regex::new(r#"^(\S+) (\S+) (\S+) \[([^\]]+)\] \"(\S+) (.*?) (\S+)\" (\d{3}) (\d+|-)$"#).unwrap();
-                                    let sissy = Regex::new(r"^(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2}) (\S+) (\w+)(?:\[(\d+)\])?: (.+)$").unwrap();
-                                    let v2 = Regex::new(r"^<(\d+)>(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+(\S+)\s+(\S+):\s(.+)$").unwrap();
-                                    let authy = Regex::new(
-                                            r"^(?P<timestamp>\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+(?P<host>\S+)\s+(?P<program>[\w\-/]+)(?:\[(?P<pid>\d+)\])?:\s+(?P<message>.+)$"
-                                    ).unwrap();
                                     let mut user_attempts: Vec<DateTime<Utc>> = Vec::new();
                                     let agents = ["curl", "wget", "python", "scrapy", "httpclient"];
                                     let config = ["/etc", "/var/log", "/root", "/boot", "apt-key", "sources.list", "/backups/", "/db/", "/exports/", "/admin", "/.git", "/upload"];
                                     let actions = ["rm ", "mv ", "cp ", "nano ", "vim ", "echo ", "truncate ", "sudo ", "su "];
                                     let shell = ["nc", "curl", "wget", "bash -i", "python -c", "sh -c", "base64", "eval", "scp", "sftp", "rsync", "curl", "wget"];
                                     let patterns = ["/etc/passwd", "/var/www/", "../", "' OR 1=1 --", "UNION SELECT", "%27", "--", ";--", ";", "&&", "|", "%3B", "%26%26", "%7C", "'", "--", "UNION", "SELECT", " OR ", "DROP", "EXEC", "xp_cmdshell"];
-                                    let risky_extensions = [".zip", ".sql", ".bak", ".7z", ".tar.gz", ".db"];
+                                    let extend = [".zip", ".sql", ".bak", ".7z", ".tar.gz", ".db"];
                                     for lin in read.lines() {
                                         let analysed_line = lin?;
                                         if let Some(ga) = &nginx.captures(&analysed_line) {
@@ -232,7 +248,7 @@ fn main(){
                                             };
                                             
                                             let rt = Runtime::new().unwrap();
-                                            let (nation, country) = rt.block_on(async {;
+                                            let (nation, country) = rt.block_on(async {
                                                 locate(log.ip).await
                                             });
                                             if nation {
@@ -240,7 +256,6 @@ fn main(){
                                                 let _ = create_alert(&message);
                                             } 
                                             if log.url.to_lowercase().contains("login") || log.url.to_lowercase().contains("logon"){
-                                                println!("I caught a bad logon attempt");
                                                 if let Ok(timestamp) = DateTime::parse_from_str(&log.time, "%Y-%m-%d %H:%M:%S") {
                                                     let timestamp_utc = timestamp.with_timezone(&Utc);
                                                     if timestamp_utc.hour() < 5 ||  timestamp_utc.hour() > 18{
@@ -256,7 +271,7 @@ fn main(){
                                                     }
 
                                                 } else {
-                                                    println!("error");
+                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
                                                 }
                                             }
                                             let worker = log.agent.to_lowercase();
@@ -268,7 +283,7 @@ fn main(){
                                                 let message = format!("A suspicious attack pattern attempt was detected within logs: {} at {}", &log.url ,&log.time);
                                                 let _ = create_alert(&message);
                                             }
-                                            for item in risky_extensions {
+                                            for item in extend {
                                                 if log.url.contains(item) || log.size > 10_000_000 {
                                                     let message = format!("Large file transfer of a suspicious nature detected at: {}, {}", &log.time, &log.url);
                                                     let _ = create_alert(&message);
@@ -298,9 +313,7 @@ fn main(){
                                             };
 
                                             if log.url.to_lowercase().contains("login") || log.url.to_lowercase().contains("logon") {
-                                                println!("I caught a bad logon attempt");
                                                 if let Ok(timestamp) = DateTime::parse_from_str(&log.time, "%d/%b/%Y:%H:%M:%S %z") {
-                                                    println!("date parsed");
                                                     let timestamp_utc = timestamp.with_timezone(&Utc);
                                                     if timestamp_utc.hour() < 5 || timestamp_utc.hour() > 18{
                                                         println!("log");
@@ -308,14 +321,15 @@ fn main(){
                                                         let _ = create_alert(&message);
                                                     }
                                                     if log.code == 401 || log.code == 403 {
-                                                        println!("Code");
-                                                        let _ = user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timestamp_utc);
                                                     }
 
+                                                } else {
+                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
                                                 }
                                             }
 
-                                            for item in risky_extensions {
+                                            for item in extend {
                                                 if log.url.contains(item) || log.size > 10_000_000{
                                                     let message = format!("Large file transfer of a suspicious nature detected at: {}, {}", &log.time, &log.url);
                                                     let _ = create_alert(&message);
@@ -324,12 +338,11 @@ fn main(){
                                             
                                             let ip = log.ip.clone();
                                             let rt = Runtime::new().unwrap();
-                                            let (nation, country) = rt.block_on(async {;
+                                            let (nation, country) = rt.block_on(async {
                                                 locate(ip).await
                                             });
                                             if nation {
                                                 let message = format!("System accessed from a suspicious country: {}", &country);
-                                              
                                                 let _ = create_alert(&message);
                                             }
 
@@ -368,14 +381,16 @@ fn main(){
                                                         let _ = create_alert(&message);
                                                     }
                                                     if log.message.to_lowercase().contains("Failed Password") {
-                                                        let _ = user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timestamp_utc);
                                                     }
 
+                                                } else {
+                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
                                                 }
                                             }
                                             if let Some(ip) = extract_ip(&log.message) {
                                                 let rt = Runtime::new().unwrap();
-                                                let (nation, country) = rt.block_on(async {;
+                                                let (nation, country) = rt.block_on(async {
                                                     locate(ip).await
                                                 });
                                                 if nation {
@@ -430,14 +445,16 @@ fn main(){
                                                     }
                                                     if log.message.to_lowercase().contains("Failed Password") {
                                                         println!("Code");
-                                                        let _ = user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timestamp_utc);
                                                     }
 
+                                                } else {
+                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
                                                 }
                                             }
                                             if let Some(ip) = extract_ip(&log.message) {
                                                 let rt = Runtime::new().unwrap();
-                                                let (nation, country) = rt.block_on(async {;
+                                                let (nation, country) = rt.block_on(async {
                                                     locate(ip).await
                                                 });
                                                 if nation {
@@ -480,7 +497,7 @@ fn main(){
 
                                             let ip = log.host.trim_start_matches("ip-").replace("-", ".");
                                             let rt = Runtime::new().unwrap();
-                                            let (nation, country) = rt.block_on(async {;
+                                            let (nation, country) = rt.block_on(async {
                                                 locate(ip).await
                                             });
                                             if nation {
@@ -504,9 +521,11 @@ fn main(){
                                                     }
                                                     if log.message.to_lowercase().contains("failed password") {
                                                         println!("Code");
-                                                        let _ = user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timestamp_utc);
                                                     }
 
+                                                }  else {
+                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
                                                 }
                                             }
                                             if log.program == "sudo" || log.program == "su" {
@@ -528,7 +547,7 @@ fn main(){
                                                 }
                                             }
                                         } else {
-                                            eprintln!("Unrecognised log format for file: {}", pathing);
+                                            error!("Unrecognise file format {}", &pathing);
                                             continue 'goob;
                                         }
                                     
@@ -546,11 +565,11 @@ fn main(){
                                         }
                                     }
                                     user_attempts.clear();
+                                    info!("Scan of filename {} has been completed", &pathing);
                                     continue 'goob;
-                                    return Ok(())
                                 }
                                 _ => {
-                                    eprintln!("Unsupported file extension for file: {}", pathing);
+                                    eprintln!("Unsupported file extension for file: {}", &pathing);
                                 }
                             }
                             return Ok(())
@@ -564,9 +583,9 @@ fn main(){
             }
         }
         "export" => {
-            match args[2].as_str() {
+            match vec[2].as_str() {
                 "csv" => {
-                    let log_file = match File::open(args[3].as_str()) {
+                    let log_file = match File::open(vec[3].as_str()) {
                         Ok(f1) => f1,
                         Err(e1) => {
                             eprintln!("Failed to create file: {}", e1);
@@ -581,12 +600,12 @@ fn main(){
                             return;
                         }
                     };
-                    let path = Path::new(args[3].as_str());
+                    let path = Path::new(vec[3].as_str());
                     match path.extension().and_then(|s| s.to_str()) {
                         Some("evtx") => {
                             let line1 = "ip,timestamp,source,EventID,pid,sid,Subject Name,Command Entered";
-                            let _ = export_file(&output, &line1);
-                            let mut parser = EvtxParser::from_path(&path).unwrap();
+                            let _ = export_file(&output, line1);
+                            let mut parser = EvtxParser::from_path(path).unwrap();
                             for logy in parser.records_json() {
                                 let data = &logy.unwrap().data;
                                 let result: Result<Value, _> = serde_json::from_str(data);
@@ -623,7 +642,7 @@ fn main(){
                             let sissy = Regex::new(r"^(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2}) (\S+) (\w+)(?:\[(\d+)\])?: (.+)$").unwrap();
                             let v2 = Regex::new(r"^<(\d+)>(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\s+(\S+)\s+(\S+):\s(.+)$").unwrap();
                             let line1 = "ip,time,method,url,protocol,code,size,referer,useragent";
-                            let _ = export_file(&output, &line1);
+                            let _ = export_file(&output, line1);
                             for lin in reader.lines() {
                                 let analysed_line = if let Ok(line) = lin {
                                     line
@@ -689,7 +708,7 @@ fn main(){
                     }
                 },
                 "json" => {
-                    let log_file = match File::open(args[3].as_str()) {
+                    let log_file = match File::open(vec[3].as_str()) {
                         Ok(f1) => f1,
                         Err(e1) => {
                             eprintln!("Failed to create file: {}", e1);
@@ -704,10 +723,10 @@ fn main(){
                             return;
                         }
                     };
-                    let path = Path::new(args[3].as_str());
+                    let path = Path::new(vec[3].as_str());
                     match path.extension().and_then(|s| s.to_str()) {
                         Some("evtx") => {
-                            let mut parser = EvtxParser::from_path(&path).unwrap();
+                            let mut parser = EvtxParser::from_path(path).unwrap();
                             for logy in parser.records_json() {
                                 let data = &logy.unwrap().data;
                                 let result: Result<Value, _> = serde_json::from_str(data);
@@ -814,11 +833,12 @@ fn main(){
                                 }
                                 
                         }   }
-                        _ => println!("Issues"),
+                        _ => error!("User attempted to process a log extension not recognised by the program {:?} ", path.extension()),
                     }
                 },
                 _ => {
-                    eprintln!("Unrecognised format, exiting...")
+                    eprintln!("Unrecognised format, exiting...");
+                    error!("User attempted to process a log extension not recognised by the program");
                 }
             }
             
@@ -857,19 +877,18 @@ fn main(){
 
 fn create_alert(message: &str) -> std::result::Result<(), Box<dyn std::error::Error>>{
     dotenv().ok();  
-    let mail = Message::builder().from("rustalyzer@gmail.com".parse()?).to(email.parse().unwrap()).subject("Security Alert from logs").body(message.to_string()).unwrap();
+    let messagestring = Message::builder().from("rustalyzer@gmail.com".parse()?).to(EMAIL.parse().unwrap()).subject("Security Alert from logs").body(message.to_string()).unwrap();
     let key = env::var("API_KEY").unwrap();
-    let info = Credentials::new(
+    let keys = Credentials::new(
         "apikey".to_string(),
         key,
     );
     let mailer = SmtpTransport::starttls_relay("smtp.sendgrid.net")? 
-        .credentials(info)
+        .credentials(keys)
         .build();
-
-    match mailer.send(&mail) {
-        Ok(_) => println!("Email sent successfully!"),
-        Err(e) => eprintln!("Could not send email: {:?}", e),
+    match mailer.send(&messagestring) {
+        Ok(_) => println!("Email sent to {} concerning a security flaw {}", &EMAIL, &message),
+        Err(e) => eprintln!("Error processing email! {}", e),
     }
     
     Ok(())
@@ -877,23 +896,16 @@ fn create_alert(message: &str) -> std::result::Result<(), Box<dyn std::error::Er
 
 async fn locate(ip: String) -> (bool, String) {
     let service = Service::IpApi;
-    let problematic = vec![
-        "iran",
-        "russia",
-        "north korea", //customise as you need
-        "ukraine",
-        "belarus",
-        "turkey",
-        "israel"
-    ];
+    let allowed = ["united kingdom","united states of america"];
     let protocol = match Locator::get(&ip, service).await {
         Ok(protocol) => protocol,
         Err(error) => {
+            error!("Geolocating IP address for log produced an error on this ip {}", &ip);
             return (false, false.to_string());
         }
     };
     println!("{}", &protocol.country);
-    if problematic.contains(&protocol.country.to_lowercase().as_str()) {
+    if !allowed.contains(&protocol.country.to_lowercase().as_str()) {
         return (true, protocol.country.to_string());
     } else {
         return (false, false.to_string());
@@ -901,13 +913,12 @@ async fn locate(ip: String) -> (bool, String) {
     
 }
 
-fn export_file (mut path: &File, line: &str) -> Result<(), Box<dyn std::error::Error>> {
-    writeln!(path, "{}", line)?;
+fn export_file (mut files: &File, message: &str) -> Result<(), Box<dyn std::error::Error>> {
+    writeln!(files, "{}", message)?;
     Ok(())
 }
 
 fn extract_ip(msg: &str) ->  Option<String>{
-    let ipfinder = Regex::new(r"\b(\d{1,3}\.){3}\d{1,3}\b").unwrap();
+    let ipfinder = Regex::new(r"\b(\d{1,3}\.){3}\d{1,3}\b").unwrap(); //looked online for this
     ipfinder.find(msg).map(|r| r.as_str().to_string())
 }
-
