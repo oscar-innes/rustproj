@@ -15,7 +15,7 @@ use log::{info, error};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::fs::{OpenOptions};
 
-pub const EMAIL: &str = "innesoscar@gmail.com";  //add the email you want to use to recieve the alerts. PLEASE SET THIS OR THE PROGRAM WILL NOT WORK!
+pub const EMAIL: &str = "";  //add the email you want to use to recieve the alerts. PLEASE SET THIS OR THE PROGRAM WILL NOT WORK!
 static SYSTEM_LOGS: &[&str] = &[
 "test.evtx",
 "system.log",
@@ -85,8 +85,6 @@ fn main(){
             pass.hash(&mut hashioka);
             let stored = hashioka.finish();  
             while stored.to_string() != password {
-                println!("that was the wrong password");
-                println!("word {}, {}", pass, password);
                 stdin().read_line(&mut pass).expect("Did not enter a correct string");
                 pass.hash(&mut hashioka);
                 let stored = hashioka.finish(); 
@@ -103,7 +101,7 @@ fn main(){
             let mut envy = OpenOptions::new()
                 .append(true)    
                 .open(".env")
-                .expect("Didn't find an env file to send data through.");
+                .expect("Didn't find an env file to send data through. Please create one!");
             writeln!(envy);
             writeln!(envy, "RUSTALYZER_PASSWORD={}", stored).expect("Env file failed");
             println!("Orginisations password has been set, remeber that now...!");
