@@ -14,6 +14,7 @@ use serde_json::Value;
 use log::{info, error};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::fs::{OpenOptions};
+ use std::collections::HashMap;
 
 pub const EMAIL: &str = "";  //add the email you want to use to recieve the alerts. PLEASE SET THIS OR THE PROGRAM WILL NOT WORK!
 static SYSTEM_LOGS: &[&str] = &[
@@ -116,6 +117,7 @@ fn main(){
                     println!("This may take a while!");
                     let _ = task::block_on(livefile());
                     async fn livefile() -> io::Result<()> {
+                        let mut timelining: HashMap<DateTime<Utc>, String> = HashMap::new();
                         let privs = ["NT AUTHORITY\\SYSTEM",
                                     "Administrator",
                                     "admin",
@@ -144,14 +146,12 @@ fn main(){
                             let path = Path::new(&paf);
                             match path.extension().and_then(|p| p.to_str()) {
                                 Some("evtx") => {
-                                    
                                     let mut user_attempts: Vec<DateTime<Utc>> = Vec::new();
                                     let mut parser = EvtxParser::from_path(path).unwrap(); // i know we werent met to do this but it was the only way
                                     for logy in parser.records_json() {
                                         let data = &logy.unwrap().data;
                                         let outcome: Result<Value, _> = serde_json::from_str(data);
                                         if let Ok(json) = outcome {
-                                            
                                             let event = json["Event"]["System"]["EventID"].as_i64().unwrap_or(0);
                                             let command = json["Event"]["EventData"]["Data"].as_array()
                                             .and_then(|items| items.iter().find(|r| r["#attributes"]["Name"] == "CommandLine"))
@@ -169,31 +169,52 @@ fn main(){
                                             .unwrap_or("N/A");
                                             let sid = json["Event"]["System"]["Security"]["#attributes"]["UserID"].as_str().unwrap_or("Unknown ID");
                                             let time = json["Event"]["System"]["TimeCreated"]["#attributes"]["SystemTime"].as_str().unwrap_or("");
+                                            let timer: DateTime<Utc> = time.parse::<DateTime<Utc>>()
+                                                .expect("Failed to parse timestamp");
                                             if event == 4688 && (command.to_lowercase().contains("powershell") || command.to_lowercase().contains("cmd.exe") || command.to_lowercase().contains(" -enc ")) {
                                                 let message = format!("Unusual command activity launched: {} at {}", &command, &time);
+                                                timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             } else if event == 1102 || event == 104 {
                                                 let message = format!("Audit log modified/cleared on the system by an actor at {}", time);
+                                                timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             } else if event == 1149 {
                                                 let message = format!("A unauthorised remote access session was created, check if this was allowed at {}", time);
+                                                timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             } else if event == 4697 || event == 7045 {
                                                 let message = format!("Unknown potentially malicious service installed or created on the machine at {}", time);
+                                                timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             } else if event == 4625 {
-                                                if let Ok(timestamp) = DateTime::parse_from_str(time, "%Y-%m-%d %H:%M:%S") {
-                                                    let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    user_attempts.push(timestamp_utc);
-                                                } else {
-                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
-                                                }
+                                                user_attempts.push(timer);
                                             } else if event == 4672 || event == 4624 {
                                                 if sid == "S-1-5-18" || sid == "S-1-5-32-544" || privs.contains(&name) {
                                                     let message = format!("A potential priviledge escalation onto a adminstrative account has occured: {}", &time);
+                                                    timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                    );  
                                                     let _ = create_alert(&message);
                                                 } else if !privs.contains(&name) {
                                                     let message = format!("A non root account was given special priviledges at this time: {}", &time);
+                                                    timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -203,6 +224,10 @@ fn main(){
                                             });
                                             if nation {
                                                 let message = format!("System accessed from a suspicious country: {}", &country);
+                                                timelining.insert(
+                                                    timer,
+                                                    message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             }
 
@@ -214,6 +239,10 @@ fn main(){
                                                 let end = user_attempts[i + 4];
                                                 if end <= start + Duration::minutes(1) {
                                                     let message = format!("Potential BruteForce attack detected at: {} to {}", start, end);
+                                                    timelining.insert(
+                                                    end,
+                                                    message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -244,46 +273,57 @@ fn main(){
                                                 refer: ga.get(8).unwrap().as_str().to_string(),
                                                 agent: ga.get(9).unwrap().as_str().to_string(),
                                             };
-                                            
+                                            let time2 = chrono::DateTime::parse_from_str(&log.time, "%d/%b/%Y:%H:%M:%S %z");
+                                            let timer = time2.unwrap().with_timezone(&Utc);
                                             let rt = Runtime::new().unwrap();
                                             let (nation, country) = rt.block_on(async {
                                                 locate(log.ip).await
                                             });
                                             if nation {
                                                 let message = format!("System accessed from a suspicious country: {}", &country);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             } 
                                             if log.url.to_lowercase().contains("login") || log.url.to_lowercase().contains("logon"){
-                                                if let Ok(timestamp) = DateTime::parse_from_str(&log.time, "%Y-%m-%d %H:%M:%S") {
-                                                    let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    if timestamp_utc.hour() < 5 ||  timestamp_utc.hour() > 18{
+                                                    if timer.hour() < 5 ||  timer.hour() > 18{
                                                         let message = format!("Suspicious logon activity detected: {}", &log.time);
+                                                        timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                        );
                                                         let _ = create_alert(&message);
-                                                    } else {
-                                                        println!("error");
                                                     }
                                                     if log.code == 401 {
-                                                        user_attempts.push(timestamp_utc);
-                                                    } else {
-                                                        println!("error");
+                                                        user_attempts.push(timer);
                                                     }
-
-                                                } else {
-                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
-                                                }
                                             }
                                             let worker = log.agent.to_lowercase();
                                             if worker.trim().is_empty() || agents.iter().any(|a| worker.contains(a)) {
                                                 let message = format!("Unusual user agent detected to access the site: {} at {}", &worker, &log.time);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             }
                                             if patterns.iter().any(|att| log.url.contains(att)) {
                                                 let message = format!("A suspicious attack pattern attempt was detected within logs: {} at {}", &log.url ,&log.time);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             }
                                             for item in extend {
                                                 if log.url.contains(item) || log.size > 10_000_000 {
                                                     let message = format!("Large file transfer of a suspicious nature detected at: {}, {}", &log.time, &log.url);
+                                                    timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -292,6 +332,10 @@ fn main(){
                                                     for pattern in &config {
                                                         if log.url.contains(pattern) {
                                                             let message = format!("Attempted alteration or modification of important system files: {}, {}", &log.url, &log.time);
+                                                            timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                            );
                                                             let _ = create_alert(&message);
                                                         }
                                                     }
@@ -309,27 +353,29 @@ fn main(){
                                                 code: ga.get(8).unwrap().as_str().parse().unwrap(),
                                                 size: ga.get(9).unwrap().as_str().parse().unwrap(),
                                             };
-
+                                            let time2 = chrono::DateTime::parse_from_str(&log.time, "%d/%b/%Y:%H:%M:%S %z");
+                                            let timer: DateTime<Utc> = time2.unwrap().with_timezone(&Utc);
                                             if log.url.to_lowercase().contains("login") || log.url.to_lowercase().contains("logon") {
-                                                if let Ok(timestamp) = DateTime::parse_from_str(&log.time, "%d/%b/%Y:%H:%M:%S %z") {
-                                                    let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    if timestamp_utc.hour() < 5 || timestamp_utc.hour() > 18{
-                                                        println!("log");
+                                                    if timer.hour() < 5 || timer.hour() > 18{
                                                         let message = format!("Suspicious logon activity detected: {}", &log.time);
+                                                        timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                        );
                                                         let _ = create_alert(&message);
                                                     }
                                                     if log.code == 401 || log.code == 403 {
-                                                        user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timer);
                                                     }
-
-                                                } else {
-                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
-                                                }
                                             }
 
                                             for item in extend {
                                                 if log.url.contains(item) || log.size > 10_000_000{
                                                     let message = format!("Large file transfer of a suspicious nature detected at: {}, {}", &log.time, &log.url);
+                                                    timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -341,6 +387,10 @@ fn main(){
                                             });
                                             if nation {
                                                 let message = format!("System accessed from a suspicious country: {}", &country);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             }
 
@@ -349,6 +399,10 @@ fn main(){
                                                     for pattern in &config {
                                                         if log.url.contains(pattern) {
                                                             let message = format!("Attempted alteration or modification of important system files: {}, {}", &log.url, &log.time);
+                                                            timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                            );
                                                             let _ = create_alert(&message);
                                                         }
                                                     }
@@ -356,6 +410,10 @@ fn main(){
                                             }
                                             if patterns.iter().any(|att| log.url.contains(att)) {
                                                 let message = format!("A suspicious attack pattern attempt was detected within logs: {} at {}", &log.url, &log.time);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             }   
                                         } else if let Some(crapola) = &sissy.captures(&analysed_line) {
@@ -368,23 +426,21 @@ fn main(){
                                                 pid: crapola.get(4).unwrap().as_str().parse().unwrap_or(0),
                                                 message: crapola.get(5).unwrap().as_str().to_string(),
                                             };
+                                            let time2 = chrono::DateTime::parse_from_str(&log.timestamp, "%d/%b/%Y:%H:%M:%S %z");
+                                            let timer: DateTime<Utc> = time2.unwrap().with_timezone(&Utc);
                                             if log.program == "sshd" || log.program == "ssh" {
-                                                println!("I caught a bad logon attempt");
-                                                if let Ok(timestamp) = DateTime::parse_from_str(&log.timestamp, "%d/%b/%Y:%H:%M:%S %z") {
-                                                    println!("date parsed");
-                                                    let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    if timestamp_utc.hour() < 5 ||  timestamp_utc.hour() > 18 {
+                                                    if timer.hour() < 5 ||  timer.hour() > 18 {
                                                         println!("log");
                                                         let message = format!("Suspicious logon activity detected: {}", &log.timestamp);
+                                                        timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                        );
                                                         let _ = create_alert(&message);
                                                     }
                                                     if log.message.to_lowercase().contains("Failed Password") {
-                                                        user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timer);
                                                     }
-
-                                                } else {
-                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
-                                                }
                                             }
                                             if let Some(ip) = extract_ip(&log.message) {
                                                 let rt = Runtime::new().unwrap();
@@ -393,12 +449,20 @@ fn main(){
                                                 });
                                                 if nation {
                                                     let message = format!("System accessed from a suspicious country: {}", &country);
+                                                    timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             } 
 
                                             if shell.iter().any(|r| log.message.contains(r)) {
                                                 let message = format!("Reverse shell OR suspicious file activity has been detected!: {}, {}", &log.message, &log.timestamp);
+                                                timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                );
                                                  _ = create_alert(&message);
                                             }
                                             for method in &actions {
@@ -406,6 +470,10 @@ fn main(){
                                                     for pattern in &config {
                                                         if log.message.contains(pattern) {
                                                             let message = format!("Attempted alteration or modification of important system files: {}, {}", &log.message, &log.timestamp);
+                                                            timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                            );
                                                             let _ = create_alert(&message);
                                                         }
                                                     }
@@ -416,6 +484,10 @@ fn main(){
                                             for pattern in &patterns {
                                                 if log.message.contains(pattern) {
                                                     let message = format!("Attempted suspicious pattern attempted!, {} {}", &log.message, &log.timestamp);
+                                                    timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -430,25 +502,26 @@ fn main(){
                                                 pid: crapola.get(6).and_then(|o| o.as_str().parse::<i32>().ok()).unwrap_or(0),
                                                 message: crapola.get(5).unwrap().as_str().to_string(),
                                             };
+                                            let time2 = chrono::DateTime::parse_from_str(&log.timestamp, "%d/%b/%Y:%H:%M:%S %z");
+                                            let timer: DateTime<Utc> = time2.unwrap().with_timezone(&Utc);
                                             if log.program == "sshd" || log.program == "ssh" {
-                                                if let Ok(timestamp) = DateTime::parse_from_str(&log.timestamp, "%d/%b/%Y:%H:%M:%S %z") {
-                                                    println!("date parsed");
-                                                    let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    if timestamp_utc.hour() < 5 ||  timestamp_utc.hour() > 18 {
+                                                    if timer.hour() < 5 ||  timer.hour() > 18 {
                                                         println!("log");
                                                         if log.message.to_lowercase().contains("session opened") {
                                                             let message = format!("Suspicious logon activity detected: {}", &log.timestamp);
+                                                            timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                            );
                                                             let _ = create_alert(&message);
                                                         }
                                                     }
                                                     if log.message.to_lowercase().contains("Failed Password") {
                                                         println!("Code");
-                                                        user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timer);
                                                     }
 
-                                                } else {
-                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
-                                                }
+                                                
                                             }
                                             if let Some(ip) = extract_ip(&log.message) {
                                                 let rt = Runtime::new().unwrap();
@@ -457,6 +530,10 @@ fn main(){
                                                 });
                                                 if nation {
                                                     let message = format!("System accessed from a suspicious country: {}", &country);
+                                                    timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             } 
@@ -466,6 +543,10 @@ fn main(){
                                                         for pattern in &config {
                                                             if log.message.contains(pattern) {
                                                                 let message = format!("Attempted alteration or modification of important system files: {}, {}", &log.message, &log.timestamp);
+                                                                timelining.insert(
+                                                                    timer,
+                                                                    message.to_string()
+                                                                );
                                                                 let _ = create_alert(&message);
                                                             }
                                                         }
@@ -475,12 +556,20 @@ fn main(){
 
                                             if shell.iter().any(|r| log.message.contains(r)) {
                                                 let message = format!("Reverse shell OR suspicious file activity has been detected!: {}, {}", &log.message, &log.timestamp);
-                                                 _ = create_alert(&message);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
+                                                _ = create_alert(&message);
                                             }
 
                                             for pattern in &patterns {
                                                 if log.message.contains(pattern) {
                                                     let message = format!("Attempted suspicious pattern attempted!, {} {}", &log.message, &log.timestamp);
+                                                    timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -492,7 +581,8 @@ fn main(){
                                                 pid: crapola.name("pid").and_then(|z| z.as_str().parse::<i32>().ok()).unwrap_or(0),
                                                 message: crapola.name("message").unwrap().as_str().to_string(),
                                             };
-
+                                            let time2 = chrono::DateTime::parse_from_str(&log.timestamp, "%d/%b/%Y:%H:%M:%S %z");
+                                            let timer: DateTime<Utc> = time2.unwrap().with_timezone(&Utc);
                                             let ip = log.host.trim_start_matches("ip-").replace("-", ".");
                                             let rt = Runtime::new().unwrap();
                                             let (nation, country) = rt.block_on(async {
@@ -500,31 +590,35 @@ fn main(){
                                             });
                                             if nation {
                                                 let message = format!("System accessed from a suspicious country: {}", &country);
+                                                timelining.insert(
+                                                            timer,
+                                                            message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                             }
 
                                             if log.program == "sshd" || log.program == "ssh" {
-                                                if let Ok(timestamp) = DateTime::parse_from_str(&log.timestamp, "%d/%b/%Y:%H:%M:%S %z") {
-                                                    println!("date parsed");
-                                                    let timestamp_utc = timestamp.with_timezone(&Utc);
-                                                    if timestamp_utc.hour() < 5 ||  timestamp_utc.hour() > 18 {
+                                                    if timer.hour() < 5 ||  timer.hour() > 18 {
                                                         println!("log");
                                                         if log.message.to_lowercase().contains("session opened") || log.message.to_lowercase().contains("accepted password"){
                                                             let message = format!("Suspicious logon activity detected: {}", &log.timestamp);
+                                                            timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                            );
                                                             let _ = create_alert(&message);
                                                         } else if log.message.to_lowercase().contains("session opened ") && log.message.to_lowercase().contains("session opened ") {
                                                             let message = format!("Root priviledge accessed, check this was allowed: {}", &log.timestamp);
+                                                            timelining.insert(
+                                                                timer,
+                                                                message.to_string()
+                                                            );
                                                             let _ = create_alert(&message);
                                                         }
                                                     }
                                                     if log.message.to_lowercase().contains("failed password") {
-                                                        println!("Code");
-                                                        user_attempts.push(timestamp_utc);
+                                                        user_attempts.push(timer);
                                                     }
-
-                                                }  else {
-                                                    error!("Timestamp could not be parsed within the {} log file", &pathing)
-                                                }
                                             }
                                             if log.program == "sudo" || log.program == "su" {
                                                 for method in &actions {
@@ -532,6 +626,10 @@ fn main(){
                                                         for pattern in &config {
                                                             if log.message.contains(pattern) {
                                                                 let message = format!("Attempted alteration or modification of important system files: {}, {}", &log.message, &log.timestamp);
+                                                                timelining.insert(
+                                                                    timer,
+                                                                    message.to_string()
+                                                                );
                                                                 let _ = create_alert(&message);
                                                             }
                                                         }
@@ -541,6 +639,10 @@ fn main(){
                                             for pattern in &patterns {
                                                 if log.message.contains(pattern) {
                                                     let message = format!("Attempted suspicious pattern attempted!, {} {}", &log.message, &log.timestamp);
+                                                    timelining.insert(
+                                                        timer,
+                                                        message.to_string()
+                                                    );
                                                     let _ = create_alert(&message);
                                                 }
                                             }
@@ -557,6 +659,10 @@ fn main(){
                                             let end = user_attempts[i + 4];
                                             if end <= start + Duration::minutes(1) {
                                                 let message = format!("Potential BruteForce attack detected at: {} to {}", start, end);
+                                                timelining.insert(
+                                                        end,
+                                                        message.to_string()
+                                                );
                                                 let _ = create_alert(&message);
                                                 
                                             }
@@ -572,8 +678,33 @@ fn main(){
                             }
                             return Ok(())
                         }
-                        return Ok(());
-                    }  
+                        let mut veccollect: Vec<_> = timelining.into_iter().collect();
+                        veccollect.sort_by_key(|(ts, _)| *ts);
+                        let mut completeset: Vec<Vec<(DateTime<Utc>, String)>> = Vec::new();
+                        let mut used_time: Vec<(DateTime<Utc>, String)> = Vec::new();
+                        let output = match File::create("attack-timelines.txt") {
+                            Ok(f) => f,
+                            Err(e) => {
+                                eprintln!("Failed to create file: {}", e);
+                                return Ok(());
+                            }
+                        };
+                        for i in 0..veccollect.len().saturating_sub(1) {
+                            let (start, _) = &veccollect[i];
+                            let (next, _) = &veccollect[i + 1];
+                            if *next >= *start + Duration::days(30 * 6) {
+                                completeset.push(used_time);
+                                used_time = Vec::new();
+                            } else {
+                                used_time.push(veccollect[i].clone());
+                            }
+                        }
+                        for timeline in completeset {
+                            let word = timeline.iter().map(|(time, issue)| format!("{} - {} ->", time, issue)).collect::<Vec<String>>().join("\n"); //maps each result into organised info to display in a direct chain of attack stages!
+                            let _ = export_file(&output, &word);
+                        }
+                        return Ok(()) 
+                    }       
                 }
             _ => {
                 eprintln!("Unsupported file");
